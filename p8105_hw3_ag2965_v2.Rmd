@@ -72,3 +72,22 @@ accel_data = read_csv("data/accel_data.csv")%>%
   mutate(
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))
 ```
+
+##Describe resulting dataset ##Need to do this
+
+Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+
+```{r}
+accel_data=read_csv("data/accel_data.csv")%>%
+  janitor::clean_names()%>%
+   pivot_longer(
+    activity_1:activity_1440,
+    names_to="activity",
+    values_to="data",
+    names_prefix="activity_")%>%
+  mutate(
+    day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))%>%
+  group_by(day)%>%
+  summarize(sum(data))
+accel_data%>%knitr::kable(digit=2)
+```
