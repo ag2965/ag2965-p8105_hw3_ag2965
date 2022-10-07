@@ -59,3 +59,16 @@ Accelerometers have become an appealing alternative to self-report techniques fo
 This problem uses five weeks of accelerometer data collected on a 63 year-old male with BMI 25, who was admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). The data can be downloaded here. In this spreadsheet, variables activity.* are the activity counts for each minute of a 24-hour day starting at midnight.
 
 Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
+
+
+```{r}
+accel_data = read_csv("data/accel_data.csv")%>%
+  janitor::clean_names()%>%
+   pivot_longer(
+    activity_1:activity_1440,
+    names_to="activity",
+    values_to="data",
+    names_prefix="activity_")%>%
+  mutate(
+    day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))
+```
