@@ -20,38 +20,6 @@ library(p8105.datasets)
 data("instacart")
 ```
 
-The goal is to do some exploration of the instacart dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following (commenting on the results of each):
-
-How many aisles are there, and which aisles are the most items ordered from?
-
-There are `r n_distinct(pull(instacart,aisle_id))` aisles. The most items are ordered from XXX aisle.
-
-```{r}
-instacart%>%
-  janitor::clean_names()%>%
-  summarize(
-    n_distinct(aisle_id))
-```
-
-Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
-
-```{r}
-instacart%>%
-  ggplot(aes(x=aisle_id))+
-  geom_histogram()
-```
-filter(aisle_id>10000)
-
-Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
-
-```{r}
-instacart%>%
-  ggplot(aes(x=aisle))+
-  geom_histogram()
-  filter(aisle_id>10000)
-```
-
-Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
 Problem 2
 Accelerometers have become an appealing alternative to self-report techniques for studying physical activity in observational studies and clinical trials, largely because of their relative objectivity. During observation periods, the devices measure “activity counts” in a short period; one-minute intervals are common. Because accelerometers can be worn comfortably and unobtrusively, they produce around-the-clock observations.
