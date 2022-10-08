@@ -113,3 +113,79 @@ accel_data2%>%
   ggplot(aes(x=activity,y=data,color=day))+
   geom_point()
 ```
+
+#Problem 3
+
+We will first load the necessary dataset.
+```{r}
+library(p8105.datasets)
+data("ny_noaa")
+```
+The goal is to do some exploration of this dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and indicating the extent to which missing data is an issue. Then, do or answer the following (commenting on the results of each):
+
+The National Oceanic and Atmospheric Association (NOAA) 
+id: Weather station ID
+date: Date of observation
+prcp: Precipitation (tenths of mm)
+snow: Snowfall (mm)
+snwd: Snow depth (mm)
+tmax: Maximum temperature (tenths of degrees C)
+tmin: Minimum temperature (tenths of degrees C)
+
+There are `r nrow(ny_noaa)`rows and `r ncol(ny_noaa)` columns in the dataset.
+`r range(pull(ny_noaa,tmax))`
+
+Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+
+```{r}
+ny_noaa=ny_noaa%>%
+  janitor::clean_names()%>%
+  separate(col=date,into=c('year','month','date'), sep='-')%>%
+  mutate(
+    year=as.integer(year),
+    month=as.integer(month),
+    month=replace(month, month == "1","January"),
+    month=replace(month, month == "2","February"),
+    month=replace(month, month == "3","March"),
+    month=replace(month, month == "4","April"),
+    month=replace(month, month == "5","May"),
+    month=replace(month, month == "6","June"),
+    month=replace(month, month == "7","July"),
+    month=replace(month, month == "8","August"),
+    month=replace(month, month == "9","September"),
+    month=replace(month, month == "10","October"),
+    month=replace(month, month == "11","November"),
+    month=replace(month, month == "12","December"),
+    prcp=as.numeric(prcp),
+    snow=as.numeric(snow),
+    snwd=as.numeric(snwd),
+    tmax=as.numeric(tmax),
+    tmin=as.numeric(tmin),
+    prcp=prcp/100,
+    snow=snow/10,
+    snwd=snwd/10,
+    tmax=tmax/10,
+    tmin=tmin/10,
+    )%>%
+  arrange(year,month,date,prcp,snow,snwd,tmax,tmin)
+```
+
+
+Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+
+```{r}
+ny_noaa%>%
+  ggplot(aes(x=id,y=tmax,color=month))+
+  filter(month=January, July)
+
+
+accel_data2%>%
+  ggplot(aes(x=activity,y=data,color=day))+
+  geom_point()
+```
+
+
+
+
+Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
+
