@@ -61,16 +61,23 @@ This problem uses five weeks of accelerometer data collected on a 63 year-old ma
 
 Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
 
+minutes (data)--> numeric
+days--> factor
+#Use factor whenever there are a limited number of variables to analyze (e.g. seasons, days of the week, most common names, etc)
 
+
+    
 ```{r}
 accel_data = read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
     activity_1:activity_1440,
     names_to="activity",
-    values_to="data",
+    values_to="minutes",
     names_prefix="activity_")%>%
   mutate(
+    day=as.factor(day),
+    minutes=as.numeric(minutes),
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))
 ```
 
@@ -84,12 +91,12 @@ accel_data=read_csv("data/accel_data.csv")%>%
    pivot_longer(
     activity_1:activity_1440,
     names_to="activity",
-    values_to="data",
+    values_to="minutes",
     names_prefix="activity_")%>%
   mutate(
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))%>%
   group_by(day)%>%
-  summarize(sum(data))
+  summarize(sum(minutes))
 accel_data%>%knitr::kable(digit=2)
 ```
 
@@ -103,14 +110,14 @@ accel_data2=read_csv("data/accel_data.csv")%>%
    pivot_longer(
     activity_1:activity_1440,
     names_to="activity",
-    values_to="data",
+    values_to="minutes",
     names_prefix="activity_")%>%
   mutate(
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))%>%
   group_by(day)
 
 accel_data2%>%
-  ggplot(aes(x=activity,y=data,color=day))+
+  ggplot(aes(x=activity,y=minutes,color=day))+
   geom_point()
 ```
 
@@ -137,13 +144,14 @@ There are `r nrow(ny_noaa)`rows and `r ncol(ny_noaa)` columns in the dataset.
 
 Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
 
+
 ```{r}
 ny_noaa=ny_noaa%>%
   janitor::clean_names()%>%
-  separate(col=date,into=c('year','month','date'), sep='-')%>%
+  separate(col=date,into=c('year','month','date'), sep="-")%>%
   mutate(
-    year=as.integer(year),
     month=as.integer(month),
+    year=as.integer(year),
     month=replace(month, month == "1","January"),
     month=replace(month, month == "2","February"),
     month=replace(month, month == "3","March"),
@@ -155,7 +163,7 @@ ny_noaa=ny_noaa%>%
     month=replace(month, month == "9","September"),
     month=replace(month, month == "10","October"),
     month=replace(month, month == "11","November"),
-    month=replace(month, month == "12","December"),
+    month=replace(month, month == "12","December"))
     prcp=as.numeric(prcp),
     snow=as.numeric(snow),
     snwd=as.numeric(snwd),
@@ -167,7 +175,7 @@ ny_noaa=ny_noaa%>%
     tmax=tmax/10,
     tmin=tmin/10,
     )%>%
-  arrange(year,month,date,prcp,snow,snwd,tmax,tmin)
+  arrange(id,year,month,date,prcp,snow,snwd,tmax,tmin)
 ```
 
 
@@ -175,13 +183,9 @@ Make a two-panel plot showing the average max temperature in January and in July
 
 ```{r}
 ny_noaa%>%
-  ggplot(aes(x=id,y=tmax,color=month))+
-  filter(month=January, July)
-
-
-accel_data2%>%
-  ggplot(aes(x=activity,y=data,color=day))+
-  geom_point()
+  ggplot(aes(x=id,y=summarize(mean(tmax)),color=month))+
+  geom_point()+
+  filter(month=="January", "July")
 ```
 
 
