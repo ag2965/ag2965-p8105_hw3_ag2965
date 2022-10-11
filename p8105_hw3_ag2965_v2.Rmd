@@ -146,10 +146,10 @@ Do some data cleaning. Create separate variables for year, month, and day. Ensur
 
 
 ```{r}
-ny_noaa=ny_noaa%>%
+ny_noaa_mini=sample_n(ny_noaa, 1000)%>%
   janitor::clean_names()%>%
   separate(col=date,into=c('year','month','date'), sep="-")%>%
-  mutate(
+    mutate(
     month=as.integer(month),
     year=as.integer(year),
     month=replace(month, month == "1","January"),
@@ -163,7 +163,7 @@ ny_noaa=ny_noaa%>%
     month=replace(month, month == "9","September"),
     month=replace(month, month == "10","October"),
     month=replace(month, month == "11","November"),
-    month=replace(month, month == "12","December"))
+    month=replace(month, month == "12","December"),
     prcp=as.numeric(prcp),
     snow=as.numeric(snow),
     snwd=as.numeric(snwd),
