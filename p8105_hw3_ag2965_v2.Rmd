@@ -216,9 +216,20 @@ ggplot(aes(x=year,y=tmax_mean, group=id))+
 
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 
-##(i)
-
-ny_noaa_mini%>%
+```{r}
+ny_noaa_tidy%>%
+  arrange(id, year, month)%>%
   group_by(month,year,id)%>%
-ggplot(aes(x=year,y=tmax,color=id))+
-  geom_bar(alpha=0.5)?????
+ggplot(aes(x=tmin,y=tmax, group=id))+
+  geom_hex()
+```
+
+```{r}
+ny_noaa_tidy%>%
+  arrange(id, year, month)%>%
+  group_by(month,year,id)%>%
+  mutate(snow=snow*10)%>%
+  filter(snow<100,snow>0)
+ggplot(aes(x=year,y=snow, group=id))+
+  geom_density_ridges(scale = .85)
+```
