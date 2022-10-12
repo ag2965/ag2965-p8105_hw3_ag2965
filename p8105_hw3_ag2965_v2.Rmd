@@ -72,8 +72,8 @@ accel_data = read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
     activity_1:activity_1440,
-    names_to="activity",
-    values_to="minutes",
+    names_to="minutes",
+    values_to="activity",
     names_prefix="activity_")%>%
   mutate(
     day=as.factor(day),
@@ -90,10 +90,12 @@ accel_data=read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
     activity_1:activity_1440,
-    names_to="activity",
-    values_to="minutes",
+    names_to="minutes",
+    values_to="activity",
     names_prefix="activity_")%>%
   mutate(
+    day=as.factor(day),
+    minutes=as.numeric(minutes),
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))%>%
   group_by(day)%>%
   summarize(sum(minutes))
@@ -105,20 +107,24 @@ accel_data%>%knitr::kable(digit=2)
 Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
 
 ```{r}
-accel_data2=read_csv("data/accel_data.csv")%>%
+accel_data=read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
     activity_1:activity_1440,
-    names_to="activity",
-    values_to="minutes",
+    names_to="minutes",
+    values_to="activity",
     names_prefix="activity_")%>%
   mutate(
-    day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))%>%
-  group_by(day)
+    day=as.factor(day),
+    activity=as.numeric(activity),
+    minutes=as.numeric(minutes),
+    day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))
 
-accel_data2%>%
-  ggplot(aes(x=activity,y=minutes,color=day))+
-  geom_point()
+accel_data%>%
+  ggplot(aes(x=minutes,y=activity,color=day))+
+  geom_smooth(se = FALSE)
+
+head(accel_data)
 ```
 
 #Problem 3
