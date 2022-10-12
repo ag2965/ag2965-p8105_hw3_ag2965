@@ -61,11 +61,6 @@ This problem uses five weeks of accelerometer data collected on a 63 year-old ma
 
 Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
 
-minutes (data)--> numeric
-days--> factor
-#Use factor whenever there are a limited number of variables to analyze (e.g. seasons, days of the week, most common names, etc)
-
-
     
 ```{r}
 accel_data = read_csv("data/accel_data.csv")%>%
@@ -99,9 +94,12 @@ accel_data=read_csv("data/accel_data.csv")%>%
     activity=as.numeric(activity),
     minutes=as.numeric(minutes),
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))%>%
-  group_by(day)%>%
-  summarize(sum(minutes))
+    group_by(week,day)%>%
+  summarize(sum(activity))
 accel_data%>%knitr::kable(digit=2)
+
+#factor relevel
+#columns- day of the week, row= weeks - pivot wider
 ```
 
 ##Add trends 
@@ -124,7 +122,6 @@ accel_data=read_csv("data/accel_data.csv")%>%
 
 accel_data%>%
   ggplot(aes(x=minutes,y=activity,color=day))+
-  geom_line(alpha=0.15)+
   geom_smooth(se = FALSE)+
 labs(
   x="Minute of day",
@@ -161,7 +158,7 @@ Below, I have performed data cleaning. Year, month, and day have been separated 
 Based on the density plot created below, the most commonly observed value for snowfall was 0.
 
 ```{r}
-ny_noaa_mini=sample_n(ny_noaa, 1000)%>%
+ny_noaa_tidy=ny_noaa%>%
   janitor::clean_names()%>%
   separate(col=date,into=c('year','month','date'), sep="-")%>%
     mutate(
@@ -193,7 +190,7 @@ ny_noaa_mini=sample_n(ny_noaa, 1000)%>%
     )%>%
   arrange(id,year,month,date,prcp,snow,snwd,tmax,tmin)
 
-ggplot(ny_noaa_mini, aes(x = snow))+ 
+ggplot(ny_noaa, aes(x = snow))+ 
   geom_density(alpha = .4)
 ```
 
@@ -201,10 +198,17 @@ ggplot(ny_noaa_mini, aes(x = snow))+
 Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 
 ```{r}
-ny_noaa%>%
-  ggplot(aes(x=id,y=summarize(mean(tmax)),color=month))+
-  geom_point()+
-  filter(month=="January", "July")
+ny_noaa_tidy%>%
+  arrange(id, year, month)%>%
+  group_by(month,year,id)%>%
+  summarize(
+    tmax_mean=mean(tmax,na.rm=TRUE))%>%
+    filter(
+      month%in% c("January","July"))%>%
+ggplot(aes(x=year,y=tmax_mean, group=id))+
+  geom_line(alpha=0.5)+
+    facet_grid(.~month)
+
 ```
 
 
@@ -212,3 +216,9 @@ ny_noaa%>%
 
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 
+##(i)
+
+ny_noaa_mini%>%
+  group_by(month,year,id)%>%
+ggplot(aes(x=year,y=tmax,color=id))+
+  geom_bar(alpha=0.5)?????
