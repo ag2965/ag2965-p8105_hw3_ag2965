@@ -25,34 +25,72 @@ The goal is to do some exploration of the instacart dataset. To that end, write 
 
 How many aisles are there, and which aisles are the most items ordered from?
 
-There are `r n_distinct(pull(instacart,aisle_id))` aisles. The most items are ordered from XXX aisle.
+There are `r n_distinct(pull(instacart,aisle_id))` aisles. The most items are ordered from the fresh fruits and fresh vegetables aisles.
 
 ```{r}
+data("instacart")
+
+instacart = 
+  instacart %>% 
+  as_tibble(instacart)
+
 instacart%>%
   janitor::clean_names()%>%
   summarize(
     n_distinct(aisle_id))
 ```
 
+```{r}
+instacart%>%
+  count(aisle)%>%
+  filter(n>100000)
+```
+
+
 Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
 
 ```{r}
 instacart%>%
-  ggplot(aes(x=aisle_id))+
-  geom_histogram()
+  count(aisle)%>%
+  filter(n>10000)%>%
+  mutate(aisle=fct_reorder(aisle,n))%>%
+  ggplot(aes(x=aisle, y=n))+
+  geom_point()+
+  labs(title = "Number of items ordered in each aisle",
+       y="number of items") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
 ```
-filter(aisle_id>10000)
 
 Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
 
 ```{r}
 instacart%>%
-  ggplot(aes(x=aisle))+
-  geom_histogram()
-  filter(aisle_id>10000)
+  filter(aisle %in% c("baking ingredients","dog food care","packaged vegetables fruits"))%>%
+  group_by(aisle)%>%
+  count(product_name)%>%
+  mutate(rank=min_rank(desc(n)))%>%
+  filter(rank<4)%>%
+  arrange(desc(n))%>%
+  knitr::kable()
 ```
 
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+
+```{r}
+instacartprob1=instacart%>%
+   filter(product_name %in% c("Pink Lady Apples","Coffee Ice Cream"))%>%
+  group_by(product_name,order_dow)%>%
+  summarize(mean(order_hour_of_day))%>%
+  mutate(
+      order_dow=recode(order_dow,"0"="Sunday", "1"="Monday", "2"="Tuesday","3"="Wednesday","4"="Thursday","5"="Friday", "6"="Saturday"))%>%
+  pivot_wider(
+    names_from = "order_dow",
+    values_from = "mean(order_hour_of_day)"
+  )
+```
+
+
 
 Problem 2
 Accelerometers have become an appealing alternative to self-report techniques for studying physical activity in observational studies and clinical trials, largely because of their relative objectivity. During observation periods, the devices measure “activity counts” in a short period; one-minute intervals are common. Because accelerometers can be worn comfortably and unobtrusively, they produce around-the-clock observations.
@@ -207,8 +245,13 @@ ny_noaa_tidy%>%
       month%in% c("January","July"))%>%
 ggplot(aes(x=year,y=tmax_mean, group=id))+
   geom_line(alpha=0.5)+
-    facet_grid(.~month)
-
+    facet_grid(.~month)+
+labs(
+  x="Year",
+  y="Average Tmax",
+  title="Average Tmax for January and July Across All Centers",
+  caption="Data came from ny_noaa package"
+)
 ```
 
 
@@ -217,19 +260,38 @@ ggplot(aes(x=year,y=tmax_mean, group=id))+
 Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
 
 ```{r}
-ny_noaa_tidy%>%
-  arrange(id, year, month)%>%
-  group_by(month,year,id)%>%
-ggplot(aes(x=tmin,y=tmax, group=id))+
-  geom_hex()
+tmaxtminplot=ny_noaa_tidy%>%
+  drop_na(c(tmax,tmin))%>%
+ggplot(aes(x=tmin,y=tmax))+
+  geom_hex()+
+  labs(
+  x="Tmax",
+  y="Tmin",
+  title="Tmax vs. Tmin Across All Centers",
+  caption="Data came from ny_noaa package"
+)
+
+tmaxtminplot
 ```
 
 ```{r}
-ny_noaa_tidy%>%
-  arrange(id, year, month)%>%
-  group_by(month,year,id)%>%
+library(ggridges)
+snow_fall=ny_noaa_tidy%>%
   mutate(snow=snow*10)%>%
-  filter(snow<100,snow>0)
-ggplot(aes(x=year,y=snow, group=id))+
-  geom_density_ridges(scale = .85)
+  filter(0<snow,snow<100)%>%
+ggplot(aes(x=snow,y=factor(year)))+
+  geom_density_ridges(scale = .85)+
+  labs(
+  x="Snowfall",
+  y="Year",
+  title="Snowfall by Year",
+  caption="Data came from ny_noaa package"
+)
+
+snow_fall
+```
+
+```{r}
+library(patchwork)
+tmaxtminplot + snow_fall
 ```
