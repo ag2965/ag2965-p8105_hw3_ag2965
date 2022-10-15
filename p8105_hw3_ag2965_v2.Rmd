@@ -20,6 +20,7 @@ library(p8105.datasets)
 data("instacart")
 ```
 
+#Problem 1
 
 The goal is to do some exploration of the instacart dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations. Then, do or answer the following (commenting on the results of each):
 
@@ -77,7 +78,7 @@ instacart%>%
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
 ```{r}
-instacartprob1=instacart%>%
+instacartapplescoffee=instacart%>%
    filter(product_name %in% c("Pink Lady Apples","Coffee Ice Cream"))%>%
   group_by(product_name,order_dow)%>%
   summarize(mean(order_hour_of_day))%>%
@@ -89,11 +90,11 @@ instacartprob1=instacart%>%
   )%>%
  knitr::kable()
 
-head(instacartprob1)
+head(instacartapplescoffee)
 ```
 
 
-Problem 2
+#Problem 2
 Accelerometers have become an appealing alternative to self-report techniques for studying physical activity in observational studies and clinical trials, largely because of their relative objectivity. During observation periods, the devices measure “activity counts” in a short period; one-minute intervals are common. Because accelerometers can be worn comfortably and unobtrusively, they produce around-the-clock observations.
 
 This problem uses five weeks of accelerometer data collected on a 63 year-old male with BMI 25, who was admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). The data can be downloaded here. In this spreadsheet, variables activity.* are the activity counts for each minute of a 24-hour day starting at midnight.
@@ -281,7 +282,7 @@ snow_fall=ny_noaa_tidy%>%
 ggplot(aes(x=snow,y=factor(year)))+
   geom_density_ridges(scale = .85)+
   labs(
-  x="Snowfall",
+  x="Snowfall in mm",
   y="Year",
   title="Snowfall by Year",
   caption="Data came from ny_noaa package"
