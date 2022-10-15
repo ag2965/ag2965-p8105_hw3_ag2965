@@ -89,7 +89,7 @@ instacartprob1=instacart%>%
   )%>%
  knitr::kable()
 
-print(instacartprob1)
+head(instacartprob1)
 ```
 
 
@@ -114,7 +114,7 @@ accel_data = read_csv("data/accel_data.csv")%>%
     minutes=as.numeric(minutes),
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))
 
-print(accel_data)
+head(accel_data)
 ```
 
 
@@ -145,7 +145,7 @@ accel_data_agg=read_csv("data/accel_data.csv")%>%
     values_from="sum(activity)")%>%
 knitr::kable(digit=2)
 
-print(accel_data_agg)
+head(accel_data_agg)
 ```
  
 
@@ -175,7 +175,7 @@ labs(
   caption="Data came from accel_data package"
 )
 
-print(accel_data_24)
+head(accel_data_24)
 ```
 
 #Problem 3
@@ -224,6 +224,8 @@ ny_noaa_tidy=ny_noaa%>%
     )%>%
   arrange(id,year,month,date,prcp,snow,snwd,tmax,tmin)
 
+head(ny_noaa)
+
 ggplot(ny_noaa, aes(x = snow))+ 
   geom_density(alpha = .4)
 ```
@@ -254,7 +256,7 @@ labs(
 
 
 
-Below, I have made a two-panel plot showing (i) tmax vs tmin for the full dataset and (ii) a density plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.The plots demonstrate that snowfall was less than 40 centimeters in most years.
+Below, I have made a two-panel plot showing (i) a scatterplot showing tmax vs tmin for the full dataset and (ii) a density plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.The plots demonstrate that snowfall was less than 40 centimeters in most years.
 
 ```{r}
 tmaxtminplot=ny_noaa_tidy%>%
@@ -262,8 +264,8 @@ tmaxtminplot=ny_noaa_tidy%>%
 ggplot(aes(x=tmin,y=tmax))+
   geom_hex()+
   labs(
-  x="Tmax",
-  y="Tmin",
+  x="Tmax in degrees C",
+  y="Tmin in degrees C",
   title="Tmax vs. Tmin Across All Centers",
   caption="Data came from ny_noaa package"
 )
