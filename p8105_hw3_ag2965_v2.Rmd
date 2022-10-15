@@ -59,7 +59,6 @@ instacart%>%
   labs(title = "Number of items ordered in each aisle",
        y="number of items") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
-
 ```
 
 Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
@@ -87,9 +86,11 @@ instacartprob1=instacart%>%
   pivot_wider(
     names_from = "order_dow",
     values_from = "mean(order_hour_of_day)"
-  )
-```
+  )%>%
+ knitr::kable()
 
+print(instacartprob1)
+```
 
 
 Problem 2
@@ -97,10 +98,9 @@ Accelerometers have become an appealing alternative to self-report techniques fo
 
 This problem uses five weeks of accelerometer data collected on a 63 year-old male with BMI 25, who was admitted to the Advanced Cardiac Care Center of Columbia University Medical Center and diagnosed with congestive heart failure (CHF). The data can be downloaded here. In this spreadsheet, variables activity.* are the activity counts for each minute of a 24-hour day starting at midnight.
 
-Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
 
-    
-```{r}
+
+```{r, show_col_types = FALSE}
 accel_data = read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
@@ -113,14 +113,17 @@ accel_data = read_csv("data/accel_data.csv")%>%
     activity=as.numeric(activity),
     minutes=as.numeric(minutes),
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))
+
+print(accel_data)
 ```
 
-##Describe resulting dataset ##Need to do this
 
-Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+Above, I have loaded and tidied the data. The dataset includes all originally observed variables and values, has useful variable names, and includes a weekday vs weekend variable. The resulting dataset has `r nrow(accel_data)` rows and `r ncol(accel_data)` columns in the dataset. The variables include week number, day of the week, minute of the day, activity at each minute of the day, and whether the day of the week is a weekday or weekend. There are a total of 5 weeks in which the accelerometer is worn. The range of the activity variable is `r range(pull(accel_data,activity))`.
+
+Below, I have wrangled the data to focus on the total activity over the day. Using my tidied dataset, I have aggregated across minutes to create a total activity variable for each day, and create a table showing these totals. This table suggests that activity levels tend to be higher on Fridays than on the other days of the week.
 
 ```{r}
-accel_data=read_csv("data/accel_data.csv")%>%
+accel_data_agg=read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
     activity_1:activity_1440,
@@ -131,21 +134,25 @@ accel_data=read_csv("data/accel_data.csv")%>%
     day=as.factor(day),
     activity=as.numeric(activity),
     minutes=as.numeric(minutes),
-    day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))%>%
+    day_id=as.factor(day_id))%>%
     group_by(week,day)%>%
-  summarize(sum(activity))
-accel_data%>%knitr::kable(digit=2)
+  summarize(sum(activity))%>%
+  ungroup(week,day)%>%
+   mutate(
+        day = forcats::fct_relevel(day, "Sunday", "Monday", "Tuesday","Wednesday","Thursday","Friday","Saturday"))%>%
+  pivot_wider(
+    names_from="day",
+    values_from="sum(activity)")%>%
+knitr::kable(digit=2)
 
-#factor relevel
-#columns- day of the week, row= weeks - pivot wider
+print(accel_data_agg)
 ```
+ 
 
-##Add trends 
-
-Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
+Accelerometer data allows the inspection activity over the course of the day. Below, I have made a single-panel plot that shows the 24-hour activity time courses for each day. The plot suggests that activity levels are lowest overnight and have a bimodal distribution during the waking part of the day, with highest levels in the morning and evening and a slight dip in activity in the middle of the day.
 
 ```{r}
-accel_data=read_csv("data/accel_data.csv")%>%
+accel_data_24=read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
     activity_1:activity_1440,
@@ -158,15 +165,17 @@ accel_data=read_csv("data/accel_data.csv")%>%
     minutes=as.numeric(minutes),
     day_type= recode(day,"Monday"="weekday", "Tuesday"="weekday",  "Wednesday"="weekday", "Thursday"="weekday", "Friday"="weekday", "Saturday"="weekend", "Sunday"="weekend"))
 
-accel_data%>%
+accel_data_24%>%
   ggplot(aes(x=minutes,y=activity,color=day))+
   geom_smooth(se = FALSE)+
 labs(
-  x="Minute of day",
-  y="Activity level",
+  x="Minute of Day",
+  y="Activity Level",
   title="Activity Level by Time of Day",
   caption="Data came from accel_data package"
 )
+
+print(accel_data_24)
 ```
 
 #Problem 3
@@ -178,22 +187,9 @@ data("ny_noaa")
 ```
 The goal is to do some exploration of this dataset. To that end, write a short description of the dataset, noting the size and structure of the data, describing some key variables, and indicating the extent to which missing data is an issue. Then, do or answer the following (commenting on the results of each):
 
-The National Oceanic and Atmospheric Association (NOAA) 
-id: Weather station ID
-date: Date of observation
-prcp: Precipitation (tenths of mm)
-snow: Snowfall (mm)
-snwd: Snow depth (mm)
-tmax: Maximum temperature (tenths of degrees C)
-tmin: Minimum temperature (tenths of degrees C)
+This data from The National Oceanic and Atmospheric Association (NOAA) includes the weather station ID, date of observation, precipitation in tenths of mm, snowfall in mm, snow depth in mm, and maximum and minimum temperatures in tenths of degrees Celsius. There are `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)` columns in the dataset. There are many missing values  in this dataset.
 
-There are `r nrow(ny_noaa)`rows and `r ncol(ny_noaa)` columns in the dataset.
-`r range(pull(ny_noaa,tmax))`
-
-Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
-
-Below, I have performed data cleaning. Year, month, and day have been separated into distinct variables. Temperature, precipitation, and snowfall are now in the following XXX variables.
-Based on the density plot created below, the most commonly observed value for snowfall was 0.
+Below, I have done some data cleaning. I have created separate variables for year, month, and day. I have changed the units of the observations for temperature to degrees Celsius, precipitation to centimeters,  snowfall to centimeters, snow depth to centimenters; these are now given in reasonable units. Based on the density plot created below, the most commonly observed value for snowfall was 0 because the majority of places did not have snow, or if they did, they did not have the same levels of snow.
 
 ```{r}
 ny_noaa_tidy=ny_noaa%>%
@@ -233,7 +229,7 @@ ggplot(ny_noaa, aes(x = snow))+
 ```
 
 
-Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+Below, I have made a two-panel plot showing the average max temperature in January and in July in each station across years. This plot demonstrates that the average maximum temperature is approximately 25 degrees Celsius warmer in July than January. It appears that the year 1988 had an exceptionally cold month of July, with a maximal temperature that was about 8 degrees Celsius lower than other years. There is some variation in temperatures each year, with an overall regression to the mean.
 
 ```{r}
 ny_noaa_tidy%>%
@@ -252,12 +248,13 @@ labs(
   title="Average Tmax for January and July Across All Centers",
   caption="Data came from ny_noaa package"
 )
+
 ```
 
 
 
 
-Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
+Below, I have made a two-panel plot showing (i) tmax vs tmin for the full dataset and (ii) a density plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.The plots demonstrate that snowfall was less than 40 centimeters in most years.
 
 ```{r}
 tmaxtminplot=ny_noaa_tidy%>%
