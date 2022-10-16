@@ -123,7 +123,7 @@ Above, I have loaded and tidied the data. The dataset includes all originally ob
 
 Below, I have wrangled the data to focus on the total activity over the day. Using my tidied dataset, I have aggregated across minutes to create a total activity variable for each day of the week and each week, and create a table showing these totals. The data demonstrates that weeks 2 and 3 were the most active weeks, while week 4 was the least active week. Wednesday, Thursday, and Friday were the most active days, while Saturday and Tuesday were the least active days. 
 
-```{r}
+```{r, show_col_types = FALSE}
 accel_data_agg=read_csv("data/accel_data.csv")%>%
   janitor::clean_names()%>%
    pivot_longer(
@@ -149,6 +149,7 @@ knitr::kable(digit=2)
 
 head(accel_data_agg)
 ```
+
  
 
 ```{r}
