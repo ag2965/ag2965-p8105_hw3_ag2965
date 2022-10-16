@@ -146,9 +146,27 @@ accel_data_agg=read_csv("data/accel_data.csv")%>%
     values_from="sum(activity)")%>%
 knitr::kable(digit=2)
 
+
 head(accel_data_agg)
 ```
  
+
+```{r}
+accel_data%>%
+group_by(day) %>%
+summarize(
+  sum_activity = sum(activity)) %>%
+  knitr::kable(digits =2)
+```
+```{r}
+
+accel_data%>%
+group_by(week) %>%
+summarize(
+  sum_activity = sum(activity)) %>%
+  knitr::kable(digits =2)
+```
+
 
 Accelerometer data allows the inspection activity over the course of the day. Below, I have made a single-panel plot that shows the 24-hour activity time courses for each day. The plot suggests that activity levels are lowest overnight and have a bimodal distribution during the waking part of the day, with highest levels in the morning and evening and a slight dip in activity in the middle of the day.
 
@@ -175,6 +193,8 @@ labs(
   title="Activity Level by Time of Day",
   caption="Data came from accel_data package"
 )
+
+
 
 head(accel_data_24)
 ```
