@@ -90,7 +90,7 @@ instacartapplescoffee=instacart%>%
   )%>%
  knitr::kable()
 
-head(instacartapplescoffee)
+print(instacartapplescoffee)
 ```
 
 
@@ -138,7 +138,6 @@ accel_data_agg=read_csv("data/accel_data.csv")%>%
     day_id=as.factor(day_id))%>%
     group_by(week,day)%>%
   summarize(sum(activity))%>%
-  ungroup(week,day)%>%
    mutate(
         day = forcats::fct_relevel(day, "Sunday", "Monday", "Tuesday","Wednesday","Thursday","Friday","Saturday"))%>%
   pivot_wider(
@@ -147,10 +146,12 @@ accel_data_agg=read_csv("data/accel_data.csv")%>%
 knitr::kable(digit=2)
 
 
-head(accel_data_agg)
+print(accel_data_agg)
 ```
 
  
+
+```
 
 ```{r}
 accel_data%>%
