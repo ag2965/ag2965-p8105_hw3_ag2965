@@ -121,7 +121,7 @@ head(accel_data)
 
 Above, I have loaded and tidied the data. The dataset includes all originally observed variables and values, has useful variable names, and includes a weekday vs weekend variable. The resulting dataset has `r nrow(accel_data)` rows and `r ncol(accel_data)` columns in the dataset. The variables include week number, day of the week, minute of the day, activity at each minute of the day, and whether the day of the week is a weekday or weekend. There are a total of 5 weeks in which the accelerometer is worn. The range of the activity variable is `r range(pull(accel_data,activity))`.
 
-Below, I have wrangled the data to focus on the total activity over the day. Using my tidied dataset, I have aggregated across minutes to create a total activity variable for each day, and create a table showing these totals. This table suggests that activity levels tend to be higher on Fridays than on the other days of the week.
+Below, I have wrangled the data to focus on the total activity over the day. Using my tidied dataset, I have aggregated across minutes to create a total activity variable for each day of the week and each week, and create a table showing these totals. The data demonstrates that weeks 2 and 3 were the most active weeks, while week 4 was the least active week. Wednesday, Thursday, and Friday were the most active days, while Saturday and Tuesday were the least active days. 
 
 ```{r}
 accel_data_agg=read_csv("data/accel_data.csv")%>%
@@ -187,16 +187,17 @@ accel_data_24=read_csv("data/accel_data.csv")%>%
 accel_data_24%>%
   ggplot(aes(x=minutes,y=activity,color=day))+
   geom_smooth(se = FALSE)+
-labs(
-  x="Minute of Day",
+  labs(
+  x="Hours - Military Time",
   y="Activity Level",
   title="Activity Level by Time of Day",
   caption="Data came from accel_data package"
-)
+)+
+  scale_x_continuous(
+    breaks = c(0, 180, 360, 540, 720, 900, 1080, 1260, 1440),
+    labels = c("00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "24:00"))
 
 
-
-head(accel_data_24)
 ```
 
 #Problem 3
